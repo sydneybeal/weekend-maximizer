@@ -38,6 +38,7 @@ export function scoreOffers(offers: FlightOffer[]): ScoredOffer[] {
 
     const score = Math.round(priceScore + durationScore + stopsScore)
 
+    // Handle labels
     let label = ''
     let labelColor = ''
     if (score >= 90) {
