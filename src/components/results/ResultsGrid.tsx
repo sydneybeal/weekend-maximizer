@@ -4,7 +4,7 @@ import type { DestinationResult } from '../../types/flights.js'
 import type { ScoredOffer } from '../../lib/scoring.js'
 import { DestinationCard } from './DestinationCard.js'
 import { SortFilterBar } from './SortFilterBar.js'
-import { useResultsStore } from '../../hooks/useResultsStore.js'
+import { useResultsStore, BUDGET_AIRLINE_CODES } from '../../hooks/useResultsStore.js'
 
 interface ResultsGridProps {
   results: DestinationResult[]
@@ -12,15 +12,25 @@ interface ResultsGridProps {
 }
 
 export function ResultsGrid({ results, isLoading }: ResultsGridProps) {
-  const { sortKey, filterKey, openDrawer } = useResultsStore()
+  const { sortKey, filterKey, excludeBudget, openDrawer } = useResultsStore()
 
-  // Apply filter
-  const filtered = results.filter((r) => {
-    if (filterKey === 'nonstop') {
-      return r.bestOffer?.outbound.stops === 0 && r.bestOffer?.inbound.stops === 0
-    }
-    return true
-  })
+  // Apply filters — budget filter strips budget carriers from each destination's offers
+  // then re-picks the best offer; nonstop filter hides destinations with no nonstop best
+  const filtered = results
+    .map((r) => {
+      if (!excludeBudget) return r
+      const nonBudgetOffers = r.offers.filter((o) => !BUDGET_AIRLINE_CODES.has(o.airline))
+      const bestOffer = nonBudgetOffers[0] ?? undefined
+      return { ...r, offers: nonBudgetOffers, bestOffer }
+    })
+    .filter((r) => {
+      if (filterKey === 'nonstop') {
+        return r.bestOffer?.outbound.stops === 0 && r.bestOffer?.inbound.stops === 0
+      }
+      // Hide destinations where budget filter removed all offers
+      if (excludeBudget && r.offers.length === 0 && !r.isLoading) return false
+      return true
+    })
 
   // Apply sort
   const sorted = [...filtered].sort((a, b) => {

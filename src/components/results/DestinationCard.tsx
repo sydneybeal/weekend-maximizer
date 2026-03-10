@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
-import { Plane, Clock, ArrowRight, Wifi, WifiOff } from 'lucide-react'
+import { Plane, Clock, ArrowRight, Wifi, WifiOff, Calendar } from 'lucide-react'
+import { format } from 'date-fns'
 import type { DestinationResult } from '../../types/flights.js'
 import type { ScoredOffer } from '../../lib/scoring.js'
 import { RecommendationBadge } from './RecommendationBadge.js'
@@ -51,8 +52,15 @@ export function DestinationCard({ result, index, onClick }: DestinationCardProps
 
   if (!best) return null
 
+  // stops === -1 means the API didn't report transfers — don't assume nonstop
   const nonstop = best.outbound.stops === 0 && best.inbound.stops === 0
-  const totalDuration = best.outbound.durationMinutes + best.inbound.durationMinutes
+  const stopsKnown = best.outbound.stops >= 0
+
+  // Compute trip dates and night count from the offer's actual departure/return times
+  const depDate = new Date(best.outbound.departureTime)
+  const retDate = new Date(best.inbound.departureTime)
+  const nights = Math.round((retDate.getTime() - depDate.getTime()) / 86400000)
+  const dateRange = `${format(depDate, 'MMM d')} – ${format(retDate, 'MMM d')}`
 
   return (
     <motion.div
@@ -93,8 +101,15 @@ export function DestinationCard({ result, index, onClick }: DestinationCardProps
 
         {/* Flight details */}
         <div className="space-y-1.5 text-[12px]">
-          <div className="flex items-center gap-2 text-white/60">
-            <Clock className="w-3.5 h-3.5 text-white/30 shrink-0" />
+          {/* Actual trip dates */}
+          <div className="flex items-center gap-2 text-white/70">
+            <Calendar className="w-3.5 h-3.5 text-electric-cyan/60 shrink-0" />
+            <span className="font-medium">{dateRange}</span>
+            <span className="text-white/30">·</span>
+            <span className="text-white/50">{nights > 0 ? `${nights} nights` : '—'}</span>
+          </div>
+          <div className="flex items-center gap-2 text-white/50">
+            <Clock className="w-3.5 h-3.5 text-white/25 shrink-0" />
             <span>{formatDuration(best.outbound.durationMinutes)} out</span>
             <span className="text-white/20">·</span>
             <span>{formatDuration(best.inbound.durationMinutes)} back</span>
@@ -104,19 +119,19 @@ export function DestinationCard({ result, index, onClick }: DestinationCardProps
             <span>{airlineNameFromCode(best.airline)}</span>
           </div>
           <div className="flex items-center gap-2">
-            {nonstop ? (
+            {stopsKnown && nonstop ? (
               <>
                 <Wifi className="w-3.5 h-3.5 text-electric-green shrink-0" />
                 <span className="text-electric-green text-[11px] font-medium">Nonstop</span>
               </>
-            ) : (
+            ) : stopsKnown ? (
               <>
-                <span className="w-3.5 h-3.5 shrink-0" />
+                <WifiOff className="w-3.5 h-3.5 text-white/20 shrink-0" />
                 <span className="text-white/40">
                   {best.outbound.stops} stop{best.outbound.stops !== 1 ? 's' : ''}
                 </span>
               </>
-            )}
+            ) : null}
           </div>
         </div>
 

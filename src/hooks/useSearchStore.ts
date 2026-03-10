@@ -1,37 +1,48 @@
 import { create } from 'zustand'
+import { addMonths, format } from 'date-fns'
 import type { SearchedCity } from '../types/airports.js'
-import { toYMD } from '../lib/utils.js'
-import { addDays } from 'date-fns'
+
+function nextMonths(count: number): string[] {
+  const today = new Date()
+  return Array.from({ length: count }, (_, i) =>
+    format(addMonths(today, i + 1), 'yyyy-MM')
+  )
+}
 
 interface SearchState {
   origins: SearchedCity[]
   destinations: SearchedCity[]
-  departureDate: string    // YYYY-MM-DD
-  returnDate: string       // YYYY-MM-DD
+  searchMonths: string[]
+  tripNights: number
   hasSearched: boolean
 
   setOrigins: (cities: SearchedCity[]) => void
   setDestinations: (cities: SearchedCity[]) => void
-  setDates: (departure: string, returnDate: string) => void
+  toggleMonth: (month: string) => void
+  setTripNights: (nights: number) => void
   toggleOriginAirport: (cityId: string, airportCode: string) => void
   toggleDestAirport: (cityId: string, airportCode: string) => void
   markSearched: () => void
 }
 
-const today = new Date()
-const defaultDepart = toYMD(addDays(today, 14))
-const defaultReturn = toYMD(addDays(today, 17))
-
 export const useSearchStore = create<SearchState>((set) => ({
   origins: [],
   destinations: [],
-  departureDate: defaultDepart,
-  returnDate: defaultReturn,
+  searchMonths: nextMonths(3).slice(0, 2),
+  tripNights: 4,
   hasSearched: false,
 
   setOrigins: (cities) => set({ origins: cities }),
   setDestinations: (cities) => set({ destinations: cities }),
-  setDates: (departureDate, returnDate) => set({ departureDate, returnDate }),
+
+  toggleMonth: (month) =>
+    set((s) => ({
+      searchMonths: s.searchMonths.includes(month)
+        ? s.searchMonths.filter((m) => m !== month)
+        : [...s.searchMonths, month].sort(),
+    })),
+
+  setTripNights: (tripNights) => set({ tripNights }),
 
   toggleOriginAirport: (cityId, airportCode) =>
     set((s) => ({
@@ -64,11 +75,14 @@ export const useSearchStore = create<SearchState>((set) => ({
   markSearched: () => set({ hasSearched: true }),
 }))
 
-// Derived selectors
 export function getSelectedOriginCodes(origins: SearchedCity[]): string[] {
   return origins.flatMap((c) => c.selectedAirports)
 }
 
 export function getSelectedDestCodes(destinations: SearchedCity[]): string[] {
   return destinations.flatMap((c) => c.selectedAirports)
+}
+
+export function getAvailableMonths(): string[] {
+  return nextMonths(6)
 }

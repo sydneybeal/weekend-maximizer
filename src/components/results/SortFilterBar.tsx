@@ -1,4 +1,4 @@
-import { SlidersHorizontal } from 'lucide-react'
+import { SlidersHorizontal, Ban } from 'lucide-react'
 import { useResultsStore } from '../../hooks/useResultsStore.js'
 import type { SortKey, FilterKey } from '../../types/flights.js'
 import { cn } from '../../lib/utils.js'
@@ -16,7 +16,7 @@ const FILTER_OPTIONS: { key: FilterKey; label: string }[] = [
 ]
 
 export function SortFilterBar({ resultCount }: { resultCount: number }) {
-  const { sortKey, filterKey, setSortKey, setFilterKey } = useResultsStore()
+  const { sortKey, filterKey, excludeBudget, setSortKey, setFilterKey, toggleExcludeBudget } = useResultsStore()
 
   return (
     <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -28,6 +28,23 @@ export function SortFilterBar({ resultCount }: { resultCount: number }) {
       </div>
 
       <div className="flex items-center gap-2 flex-wrap">
+        {/* Budget airline toggle */}
+        <button
+          onClick={toggleExcludeBudget}
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all',
+            excludeBudget
+              ? 'bg-electric-red/20 text-electric-red border border-electric-red/30'
+              : 'text-white/40 hover:text-white/60'
+          )}
+          title="Excludes Spirit (NK), Frontier (F9), and Allegiant (G4)"
+        >
+          <Ban className="w-3 h-3" />
+          No Spirit / Frontier
+        </button>
+
+        <div className="w-px h-4 bg-white/10" />
+
         {/* Filter pills */}
         <div className="flex gap-1">
           {FILTER_OPTIONS.map((opt) => (

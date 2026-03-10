@@ -46,16 +46,7 @@ body::before {
   z-index: 0;
 }
 
-/* Dot grid background */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 24px 24px;
-  pointer-events: none;
-  z-index: 0;
-}
+/* Stars are rendered by the StarField canvas component */
 
 #root {
   position: relative;

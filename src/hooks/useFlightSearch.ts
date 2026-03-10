@@ -4,16 +4,22 @@ import type { FlightOffer, DestinationResult } from '../types/flights.js'
 import { scoreOffers } from '../lib/scoring.js'
 import { airportCityMap } from '../lib/utils.js'
 
-interface SearchPair {
+interface SearchTriplet {
   origin: string
   destination: string
+  month: string        // YYYY-MM
 }
 
 interface SearchParams {
-  pairs: SearchPair[]
-  departureDate: string
-  returnDate: string
+  triplets: SearchTriplet[]
+  tripNights: number   // preferred trip length; filter to ±1 day
   enabled: boolean
+}
+
+function offerNights(offer: FlightOffer): number {
+  const dep = new Date(offer.outbound.departureTime).getTime()
+  const ret = new Date(offer.inbound.departureTime).getTime()
+  return Math.round((ret - dep) / 86400000)
 }
 
 interface FlightSearchResponse {
@@ -26,58 +32,52 @@ interface FlightSearchResponse {
 async function fetchFlights(
   origin: string,
   destination: string,
-  departureDate: string,
-  returnDate: string
+  month: string,
+  tripNights: number,
 ): Promise<FlightSearchResponse> {
   const res = await fetch('/api/flights/search', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ origin, destination, departureDate, returnDate }),
+    body: JSON.stringify({ origin, destination, month, tripNights }),
   })
-  if (!res.ok) {
-    return { origin, destination, offers: [], error: `HTTP ${res.status}` }
-  }
+  if (!res.ok) return { origin, destination, offers: [], error: `HTTP ${res.status}` }
   return res.json() as Promise<FlightSearchResponse>
 }
 
-export function useFlightSearch({ pairs, departureDate, returnDate, enabled }: SearchParams) {
+export function useFlightSearch({ triplets, tripNights, enabled }: SearchParams) {
   const queries = useQueries({
-    queries: pairs.map(({ origin, destination }) => ({
-      queryKey: ['flights', origin, destination, departureDate, returnDate],
-      queryFn: () => fetchFlights(origin, destination, departureDate, returnDate),
+    queries: triplets.map(({ origin, destination, month }) => ({
+      queryKey: ['flights', origin, destination, month, tripNights],
+      queryFn: () => fetchFlights(origin, destination, month, tripNights),
       enabled,
-      staleTime: 5 * 60 * 1000,
-      gcTime: 10 * 60 * 1000,
+      staleTime: 30 * 60 * 1000,   // cached prices are stable for 30 min
+      gcTime: 60 * 60 * 1000,
       retry: 1,
     })),
   })
 
-  const totalSearches = pairs.length
+  const totalSearches = triplets.length
   const completedSearches = queries.filter((q) => q.isSuccess || q.isError).length
   const isLoading = queries.some((q) => q.isFetching)
   const progress = totalSearches > 0 ? (completedSearches / totalSearches) * 100 : 0
 
-  // Group all successful offers by destination
   const resultsByDestination = useMemo<DestinationResult[]>(() => {
-    // Collect all offers
     const allOffers: FlightOffer[] = queries
       .filter((q) => q.isSuccess && q.data)
       .flatMap((q) => q.data!.offers)
 
-    // Unique destinations from pairs
-    const destCodes = [...new Set(pairs.map((p) => p.destination))]
+    const destCodes = [...new Set(triplets.map((t) => t.destination))]
 
     return destCodes.map((dest) => {
-      const destOffers = allOffers.filter((o) => o.destination === dest)
+      const destOffers = allOffers
+        .filter((o) => o.destination === dest)
+        .filter((o) => Math.abs(offerNights(o) - tripNights) <= 2)
       const scored = scoreOffers(destOffers)
       const bestOffer = scored.sort((a, b) => b.score - a.score)[0]
 
-      // Check if all queries for this destination are done
-      const destQueries = queries.filter((_, i) => pairs[i]?.destination === dest)
+      const destQueries = queries.filter((_, i) => triplets[i]?.destination === dest)
       const destLoading = destQueries.some((q) => q.isFetching || q.isPending)
-      const destError = destQueries.every((q) => q.isError)
-        ? 'No flights found'
-        : undefined
+      const destError = destQueries.every((q) => q.isError) ? 'No flights found' : undefined
 
       return {
         destination: dest,
@@ -89,7 +89,7 @@ export function useFlightSearch({ pairs, departureDate, returnDate, enabled }: S
         error: destError,
       }
     })
-  }, [queries, pairs])
+  }, [queries, triplets, tripNights])
 
   return { resultsByDestination, isLoading, progress, completedSearches, totalSearches }
 }

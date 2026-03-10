@@ -19,17 +19,17 @@ export function SearchControls({
   totalSearches,
   isDirty,
 }: SearchControlsProps) {
-  const { origins, destinations, departureDate, returnDate, hasSearched } = useSearchStore()
+  const { origins, destinations, searchMonths, hasSearched } = useSearchStore()
 
   const originCodes = getSelectedOriginCodes(origins)
   const destCodes = getSelectedDestCodes(destinations)
 
   const missingOrigins = originCodes.length === 0
   const missingDests = destCodes.length === 0
-  const missingDates = departureDate.length < 10 || returnDate.length < 10
-  const disabled = missingOrigins || missingDests || missingDates || isLoading
+  const missingMonths = searchMonths.length === 0
+  const disabled = missingOrigins || missingDests || missingMonths || isLoading
 
-  const pairCount = originCodes.length * destCodes.length
+  const tripletCount = originCodes.length * destCodes.length * searchMonths.length
   const isRefresh = hasSearched && isDirty
 
   return (
@@ -78,7 +78,7 @@ export function SearchControls({
       )}
 
       {/* Validation hints */}
-      {!isLoading && (missingOrigins || missingDests || missingDates) && (
+      {!isLoading && (missingOrigins || missingDests || missingMonths) && (
         <div className="flex items-start gap-2 text-[11px] text-white/35">
           <AlertCircle className="w-3.5 h-3.5 text-electric-amber/60 shrink-0 mt-0.5" />
           <span>
@@ -88,17 +88,16 @@ export function SearchControls({
               ? 'Add at least one origin city'
               : missingDests
               ? 'Add at least one destination'
-              : 'Select departure & return dates'}
+              : 'Select at least one month to search'}
           </span>
         </div>
       )}
 
-      {/* Route summary when ready */}
       {!disabled && !isLoading && (
         <p className="text-[10px] text-white/25 text-center">
-          {pairCount} route{pairCount !== 1 ? 's' : ''} ·{' '}
+          {tripletCount} search{tripletCount !== 1 ? 'es' : ''} ·{' '}
           {originCodes.length} origin{originCodes.length !== 1 ? 's' : ''} ×{' '}
-          {destCodes.length} destination{destCodes.length !== 1 ? 's' : ''}
+          {destCodes.length} dest × {searchMonths.length} month{searchMonths.length !== 1 ? 's' : ''}
         </p>
       )}
     </div>
