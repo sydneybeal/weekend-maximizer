@@ -1,0 +1,106 @@
+import { Search, RefreshCw, AlertCircle } from 'lucide-react'
+import { useSearchStore, getSelectedOriginCodes, getSelectedDestCodes } from '../../hooks/useSearchStore.js'
+import { cn } from '../../lib/utils.js'
+
+interface SearchControlsProps {
+  onSearch: () => void
+  isLoading: boolean
+  progress: number
+  completedSearches: number
+  totalSearches: number
+  isDirty: boolean
+}
+
+export function SearchControls({
+  onSearch,
+  isLoading,
+  progress,
+  completedSearches,
+  totalSearches,
+  isDirty,
+}: SearchControlsProps) {
+  const { origins, destinations, departureDate, returnDate, hasSearched } = useSearchStore()
+
+  const originCodes = getSelectedOriginCodes(origins)
+  const destCodes = getSelectedDestCodes(destinations)
+
+  const missingOrigins = originCodes.length === 0
+  const missingDests = destCodes.length === 0
+  const missingDates = departureDate.length < 10 || returnDate.length < 10
+  const disabled = missingOrigins || missingDests || missingDates || isLoading
+
+  const pairCount = originCodes.length * destCodes.length
+  const isRefresh = hasSearched && isDirty
+
+  return (
+    <div className="space-y-2.5">
+      {/* Search button */}
+      <button
+        onClick={onSearch}
+        disabled={disabled}
+        className={cn(
+          'w-full rounded-xl py-3 px-4 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200',
+          disabled
+            ? 'glass text-white/25 cursor-not-allowed'
+            : isRefresh
+            ? 'bg-gradient-to-r from-electric-amber/80 to-electric-cyan text-white shadow-lg hover:scale-[1.02] active:scale-[0.98]'
+            : 'bg-gradient-to-r from-electric-blue to-electric-cyan text-white shadow-lg shadow-electric-blue/25 hover:shadow-electric-blue/40 hover:scale-[1.02] active:scale-[0.98]'
+        )}
+      >
+        {isLoading ? (
+          <RefreshCw className="w-4 h-4 animate-spin" />
+        ) : isRefresh ? (
+          <RefreshCw className="w-4 h-4" />
+        ) : (
+          <Search className="w-4 h-4" />
+        )}
+        {isLoading
+          ? 'Searching...'
+          : isRefresh
+          ? 'Refresh Results'
+          : 'Search Flights'}
+      </button>
+
+      {/* Progress bar */}
+      {isLoading && totalSearches > 0 && (
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-[10px] text-white/30">
+            <span>Checking routes</span>
+            <span className="price-text">{completedSearches}/{totalSearches}</span>
+          </div>
+          <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-electric-blue to-electric-cyan rounded-full transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Validation hints */}
+      {!isLoading && (missingOrigins || missingDests || missingDates) && (
+        <div className="flex items-start gap-2 text-[11px] text-white/35">
+          <AlertCircle className="w-3.5 h-3.5 text-electric-amber/60 shrink-0 mt-0.5" />
+          <span>
+            {missingOrigins && missingDests
+              ? 'Add origin & destination cities'
+              : missingOrigins
+              ? 'Add at least one origin city'
+              : missingDests
+              ? 'Add at least one destination'
+              : 'Select departure & return dates'}
+          </span>
+        </div>
+      )}
+
+      {/* Route summary when ready */}
+      {!disabled && !isLoading && (
+        <p className="text-[10px] text-white/25 text-center">
+          {pairCount} route{pairCount !== 1 ? 's' : ''} ·{' '}
+          {originCodes.length} origin{originCodes.length !== 1 ? 's' : ''} ×{' '}
+          {destCodes.length} destination{destCodes.length !== 1 ? 's' : ''}
+        </p>
+      )}
+    </div>
+  )
+}
