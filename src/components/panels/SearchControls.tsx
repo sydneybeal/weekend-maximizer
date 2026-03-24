@@ -44,7 +44,7 @@ export function SearchControls({
             ? 'glass text-white/25 cursor-not-allowed'
             : isRefresh
             ? 'bg-gradient-to-r from-electric-amber/80 to-electric-cyan text-white shadow-lg hover:scale-[1.02] active:scale-[0.98]'
-            : 'bg-gradient-to-r from-electric-blue to-electric-cyan text-white shadow-lg shadow-electric-blue/25 hover:shadow-electric-blue/40 hover:scale-[1.02] active:scale-[0.98]'
+            : 'bg-gradient-to-r from-electric-blue to-electric-cyan text-white shadow-lg shadow-electric-blue/25 hover:scale-[1.02] active:scale-[0.98] search-btn-glow'
         )}
       >
         {isLoading ? (
@@ -54,11 +54,13 @@ export function SearchControls({
         ) : (
           <Search className="w-4 h-4" />
         )}
-        {isLoading
-          ? 'Searching...'
-          : isRefresh
-          ? 'Refresh Results'
-          : 'Search Flights'}
+        <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 600, letterSpacing: '0.08em', fontSize: '14px' }}>
+          {isLoading
+            ? 'SEARCHING...'
+            : isRefresh
+            ? 'REFRESH RESULTS'
+            : 'SEARCH FLIGHTS'}
+        </span>
       </button>
 
       {/* Progress bar */}

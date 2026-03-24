@@ -14,7 +14,7 @@ export function GlassCard({ children, className, hover = false, active = false, 
     <div
       onClick={onClick}
       className={cn(
-        'glass rounded-2xl',
+        'glass-card rounded-2xl',
         hover && 'glass-hover cursor-pointer',
         active && 'glass-active',
         onClick && !hover && 'cursor-pointer',
@@ -28,7 +28,7 @@ export function GlassCard({ children, className, hover = false, active = false, 
 
 export function SectionLabel({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <p className={cn('text-[10px] font-semibold uppercase tracking-widest text-white/30 mb-2', className)}>
+    <p className={cn('section-label', className)}>
       {children}
     </p>
   )

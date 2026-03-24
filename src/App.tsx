@@ -84,7 +84,7 @@ function AppInner() {
       <DashboardHeader />
 
       <div className="flex-1 flex overflow-hidden">
-        <aside className="w-80 shrink-0 border-r border-white/5 bg-navy-900/40 backdrop-blur-xl flex flex-col overflow-hidden">
+        <aside className="w-80 shrink-0 border-r border-white/[0.06] bg-navy-950/60 backdrop-blur-xl flex flex-col overflow-hidden">
           <div className="p-4 border-b border-white/5 shrink-0">
             <SearchControls
               onSearch={handleSearch}
@@ -165,32 +165,60 @@ function AppInner() {
 }
 
 function WelcomeHero() {
+  const steps = [
+    { num: '01', label: 'Add Cities',  desc: 'Origins + destinations' },
+    { num: '02', label: 'Set Nights',  desc: '3, 4, or 5 nights' },
+    { num: '03', label: 'Pick Months', desc: 'Which months to scan' },
+    { num: '04', label: 'Search',      desc: 'Best deals surface' },
+  ]
+
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center gap-6">
-      <div className="relative">
-        <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-electric-blue/20 to-electric-cyan/20 border border-electric-blue/20 flex items-center justify-center">
-          <span className="text-4xl">✈️</span>
+    <div className="flex flex-col items-center justify-center py-20 text-center gap-10">
+      {/* Icon with rings */}
+      <div className="relative flex items-center justify-center">
+        <div className="ring-breathe absolute w-36 h-36 rounded-full border border-electric-blue/15" />
+        <div className="ring-breathe absolute w-24 h-24 rounded-full border border-electric-cyan/20" style={{ animationDelay: '1.5s' }} />
+        <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-electric-blue/25 to-electric-cyan/25 border border-electric-blue/30 flex items-center justify-center shadow-lg shadow-electric-blue/20">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-electric-cyan" style={{ transform: 'rotate(-45deg)' }}>
+            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+          </svg>
+          <div className="absolute -inset-1 rounded-2xl bg-electric-blue/15 blur-lg -z-10" />
         </div>
-        <div className="absolute -inset-2 bg-electric-blue/10 rounded-3xl blur-xl -z-10" />
       </div>
-      <div>
-        <h2 className="text-2xl font-bold text-white mb-2">Find your next escape</h2>
-        <p className="text-white/40 max-w-md mx-auto leading-relaxed">
-          Add origin and destination cities, pick how many nights and which months to search,
-          then hit Search to find the best deals across all your options.
+
+      {/* Heading */}
+      <div className="space-y-3">
+        <p className="text-[11px] font-mono text-electric-cyan/50 uppercase tracking-[0.25em]">
+          [ Mission Briefing ]
+        </p>
+        <h2
+          className="text-5xl text-white leading-none"
+          style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, letterSpacing: '0.04em' }}
+        >
+          FIND YOUR NEXT ESCAPE
+        </h2>
+        <p className="text-white/35 max-w-sm mx-auto leading-relaxed text-sm font-light">
+          Scan origins and destinations across months — the best deals surface automatically.
         </p>
       </div>
-      <div className="flex gap-4 flex-wrap justify-center">
-        {[
-          { icon: '📍', label: 'Add cities',   desc: 'Origins + destinations' },
-          { icon: '🌙', label: 'Set nights',   desc: '3, 4, or 5 nights' },
-          { icon: '📅', label: 'Pick months',  desc: 'Which months to scan' },
-          { icon: '🔍', label: 'Hit Search',   desc: 'Best deals surface automatically' },
-        ].map((s) => (
-          <div key={s.label} className="glass rounded-xl p-4 w-32">
-            <span className="text-2xl">{s.icon}</span>
-            <p className="text-sm font-semibold text-white mt-2">{s.label}</p>
-            <p className="text-[11px] text-white/30 mt-0.5">{s.desc}</p>
+
+      {/* Steps */}
+      <div className="flex gap-3 flex-wrap justify-center">
+        {steps.map((s, i) => (
+          <div key={s.num} className="flex items-center gap-3">
+            <div className="glass-card rounded-xl px-5 py-4 w-36 text-left">
+              <p className="text-[10px] font-mono text-electric-cyan/40 mb-2 tracking-widest">{s.num}</p>
+              <p
+                className="text-sm text-white leading-tight"
+                style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 600, letterSpacing: '0.04em' }}
+              >
+                {s.label}
+              </p>
+              <p className="text-[11px] text-white/30 mt-0.5 font-light">{s.desc}</p>
+            </div>
+            {i < steps.length - 1 && (
+              <div className="text-white/10 text-lg font-mono">›</div>
+            )}
           </div>
         ))}
       </div>

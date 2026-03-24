@@ -76,10 +76,13 @@ export function DestinationCard({ result, index, onClick }: DestinationCardProps
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="text-base font-bold text-white group-hover:text-electric-cyan transition-colors">
-              {result.destinationCity}
+            <h3
+              className="text-lg text-white group-hover:text-electric-cyan transition-colors leading-tight"
+              style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, letterSpacing: '0.04em' }}
+            >
+              {result.destinationCity.toUpperCase()}
             </h3>
-            <p className="text-[11px] text-white/40 font-mono">{result.destination}</p>
+            <p className="text-[10px] text-white/35 font-mono tracking-widest mt-0.5">{result.destination}</p>
           </div>
           {best.label && (
             <RecommendationBadge label={best.label} color={best.labelColor} />
@@ -88,14 +91,17 @@ export function DestinationCard({ result, index, onClick }: DestinationCardProps
 
         {/* Price */}
         <div className="mb-3">
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold price-text text-white">
+          <div className="flex items-baseline gap-2">
+            <span
+              className="text-3xl price-text font-bold"
+              style={{ background: 'linear-gradient(135deg, #e8f4ff 30%, #6ee7f7 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+            >
               {formatPrice(best.price)}
             </span>
-            <span className="text-xs text-white/30">/ person</span>
+            <span className="text-xs text-white/25 font-light">/ person</span>
           </div>
-          <p className="text-[11px] text-white/40 mt-0.5">
-            from <span className="text-white/60 font-mono">{best.origin}</span>
+          <p className="text-[10px] text-white/35 mt-0.5 font-mono tracking-wide">
+            from <span className="text-electric-cyan/60">{best.origin}</span>
           </p>
         </div>
 

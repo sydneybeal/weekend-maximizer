@@ -23,9 +23,10 @@ export function TripConfigurator() {
               className={cn(
                 'flex-1 py-2 rounded-lg text-sm font-medium transition-all',
                 tripNights === n
-                  ? 'bg-electric-blue/20 border border-electric-blue/40 text-electric-cyan'
-                  : 'glass text-white/40 hover:text-white/60'
+                  ? 'bg-electric-blue/15 border border-electric-cyan/40 text-electric-cyan shadow-sm shadow-electric-cyan/20'
+                  : 'glass text-white/35 hover:text-white/55 hover:border-white/10'
               )}
+              style={tripNights === n ? { fontFamily: "'Rajdhani', sans-serif", fontWeight: 600, letterSpacing: '0.05em' } : {}}
             >
               {n} nights
             </button>
@@ -50,8 +51,8 @@ export function TripConfigurator() {
                 className={cn(
                   'px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all',
                   selected
-                    ? 'bg-electric-blue/20 border border-electric-blue/40 text-electric-cyan'
-                    : 'glass text-white/40 hover:text-white/60'
+                    ? 'bg-electric-blue/15 border border-electric-cyan/40 text-electric-cyan shadow-sm shadow-electric-cyan/15'
+                    : 'glass text-white/35 hover:text-white/55 hover:border-white/10'
                 )}
               >
                 {label}
