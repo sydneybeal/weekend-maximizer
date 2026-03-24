@@ -14,12 +14,14 @@ interface SearchState {
   destinations: SearchedCity[]
   searchMonths: string[]
   tripNights: number
+  departureDay: number   // 0=Sun … 6=Sat
   hasSearched: boolean
 
   setOrigins: (cities: SearchedCity[]) => void
   setDestinations: (cities: SearchedCity[]) => void
   toggleMonth: (month: string) => void
   setTripNights: (nights: number) => void
+  setDepartureDay: (day: number) => void
   toggleOriginAirport: (cityId: string, airportCode: string) => void
   toggleDestAirport: (cityId: string, airportCode: string) => void
   markSearched: () => void
@@ -28,8 +30,9 @@ interface SearchState {
 export const useSearchStore = create<SearchState>((set) => ({
   origins: [],
   destinations: [],
-  searchMonths: nextMonths(3).slice(0, 2),
+  searchMonths: nextMonths(3).slice(1, 2),
   tripNights: 4,
+  departureDay: 4,   // Thursday (Thu→Mon default for 4 nights)
   hasSearched: false,
 
   setOrigins: (cities) => set({ origins: cities }),
@@ -43,6 +46,7 @@ export const useSearchStore = create<SearchState>((set) => ({
     })),
 
   setTripNights: (tripNights) => set({ tripNights }),
+  setDepartureDay: (departureDay) => set({ departureDay }),
 
   toggleOriginAirport: (cityId, airportCode) =>
     set((s) => ({

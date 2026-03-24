@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react'
-import { Plane } from 'lucide-react'
+import { Plane, Menu } from 'lucide-react'
 
-export function DashboardHeader() {
+export function DashboardHeader({ onMenuClick }: { onMenuClick?: () => void }) {
   return (
     <header className="border-b border-white/5 bg-navy-900/80 backdrop-blur-xl sticky top-0 z-50">
-      <div className="max-w-[1600px] mx-auto px-6 py-3.5 flex items-center justify-between">
-        <div className="flex items-center gap-3.5">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {/* Hamburger — mobile only */}
+          <button
+            className="md:hidden p-2 -ml-1 rounded-lg glass text-white/50 hover:text-white/80 transition-colors"
+            onClick={onMenuClick}
+            aria-label="Toggle menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
           <div className="relative">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-electric-blue to-electric-cyan flex items-center justify-center shadow-lg shadow-electric-blue/30">
               <Plane className="w-5 h-5 text-white fill-white" style={{ transform: 'rotate(-45deg)' }} />
@@ -25,8 +33,10 @@ export function DashboardHeader() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <MissionClock />
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:block">
+            <MissionClock />
+          </div>
           <ApiStatusPill />
         </div>
       </div>

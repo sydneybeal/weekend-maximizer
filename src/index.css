@@ -192,7 +192,7 @@ body::after {
   border: 1px solid rgba(255, 255, 255, 0.09);
   color: #dde8ff;
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 8px 12px 8px 2.25rem;
   font-family: var(--font-sans);
   font-size: 14px;
   outline: none;

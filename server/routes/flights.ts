@@ -1,16 +1,17 @@
 import { Router } from 'express'
-import { searchFlights } from '../lib/travelpayouts.js'
+import { searchFlights } from '../lib/amadeus.js'
 
 const router = Router()
 
 // POST /api/flights/search
 // Body: { origin, destination, month, tripNights }
 router.post('/search', async (req, res) => {
-  const { origin, destination, month, tripNights } = req.body as {
+  const { origin, destination, month, tripNights, departureDay } = req.body as {
     origin?: string
     destination?: string
     month?: string
     tripNights?: number
+    departureDay?: number
   }
 
   if (!origin || !destination || !month) {
@@ -21,19 +22,13 @@ router.post('/search', async (req, res) => {
     return res.status(400).json({ error: 'month must be YYYY-MM' })
   }
 
-  const rawIp = (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0].trim()
-    ?? req.socket.remoteAddress
-    ?? '127.0.0.1'
-  // Normalize IPv6 loopback — ::1 contains colons that corrupt the MD5 signature string
-  const userIp = (rawIp === '::1' || rawIp === '::ffff:127.0.0.1') ? '127.0.0.1' : rawIp
-
   try {
     const offers = await searchFlights({
       origin: origin.toUpperCase(),
       destination: destination.toUpperCase(),
       month,
       tripNights: tripNights ?? 4,
-      userIp,
+      departureDay: departureDay ?? 5,
     })
     return res.json({ origin, destination, offers })
   } catch (err) {

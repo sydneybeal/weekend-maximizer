@@ -15,7 +15,7 @@ const FILTER_OPTIONS: { key: FilterKey; label: string }[] = [
   { key: 'nonstop', label: 'Nonstop Only' },
 ]
 
-export function SortFilterBar({ resultCount }: { resultCount: number }) {
+export function SortFilterBar({ resultCount, nonstopCount }: { resultCount: number; nonstopCount: number }) {
   const { sortKey, filterKey, excludeBudget, setSortKey, setFilterKey, toggleExcludeBudget } = useResultsStore()
 
   return (
@@ -59,6 +59,9 @@ export function SortFilterBar({ resultCount }: { resultCount: number }) {
               )}
             >
               {opt.label}
+              <span className="ml-1.5 text-white/25">
+                ({opt.key === 'nonstop' ? nonstopCount : resultCount})
+              </span>
             </button>
           ))}
         </div>

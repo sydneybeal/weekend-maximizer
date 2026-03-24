@@ -86,6 +86,41 @@ export function searchAirportsByCity(query: string): AirportSearchResult | null 
   const q = query.toLowerCase().trim()
   if (q.length < 2) return null
 
+  // Try exact IATA code match first (e.g. "PHL", "PHX")
+  const iataMatch = airports.find((a) => a.iata.toLowerCase() === q)
+  if (iataMatch) {
+    const mainLat = parseFloat(iataMatch.latitude)
+    const mainLon = parseFloat(iataMatch.longitude)
+    const nearby = airports
+      .map((a) => ({
+        a,
+        km: haversineKm(mainLat, mainLon, parseFloat(a.latitude), parseFloat(a.longitude)),
+        major: MAJOR_IATA.has(a.iata),
+      }))
+      .filter(({ km }) => km <= 150)
+      .sort((x, y) => {
+        if (x.major && !y.major) return -1
+        if (!x.major && y.major) return 1
+        return x.km - y.km
+      })
+      .slice(0, 4)
+      .map(({ a, km }): Airport => ({
+        code: a.iata,
+        name: a.name,
+        city: a.city,
+        country: a.country,
+        distance: Math.round(km),
+      }))
+    return {
+      name: iataMatch.city,
+      code: iataMatch.iata,
+      country: iataMatch.country,
+      lat: mainLat,
+      lon: mainLon,
+      airports: nearby,
+    }
+  }
+
   // Prefix match on city name first, substring fallback
   let matches = airports.filter((a) => a.city.toLowerCase().startsWith(q))
   if (matches.length === 0) {

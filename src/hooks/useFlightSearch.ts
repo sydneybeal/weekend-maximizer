@@ -12,7 +12,8 @@ interface SearchTriplet {
 
 interface SearchParams {
   triplets: SearchTriplet[]
-  tripNights: number   // preferred trip length; filter to ±1 day
+  tripNights: number
+  departureDay: number  // 0=Sun … 6=Sat
   enabled: boolean
 }
 
@@ -34,24 +35,25 @@ async function fetchFlights(
   destination: string,
   month: string,
   tripNights: number,
+  departureDay: number,
 ): Promise<FlightSearchResponse> {
   const res = await fetch('/api/flights/search', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ origin, destination, month, tripNights }),
+    body: JSON.stringify({ origin, destination, month, tripNights, departureDay }),
   })
   if (!res.ok) return { origin, destination, offers: [], error: `HTTP ${res.status}` }
   return res.json() as Promise<FlightSearchResponse>
 }
 
-export function useFlightSearch({ triplets, tripNights, enabled }: SearchParams) {
+export function useFlightSearch({ triplets, tripNights, departureDay, enabled }: SearchParams) {
   const queries = useQueries({
     queries: triplets.map(({ origin, destination, month }) => ({
-      queryKey: ['flights', origin, destination, month, tripNights],
-      queryFn: () => fetchFlights(origin, destination, month, tripNights),
+      queryKey: ['flights', origin, destination, month, tripNights, departureDay],
+      queryFn: () => fetchFlights(origin, destination, month, tripNights, departureDay),
       enabled,
-      staleTime: 30 * 60 * 1000,   // cached prices are stable for 30 min
-      gcTime: 60 * 60 * 1000,
+      staleTime: 6 * 60 * 60 * 1000,  // server caches for 6h, no point re-fetching sooner
+      gcTime: 6 * 60 * 60 * 1000,
       retry: 1,
     })),
   })

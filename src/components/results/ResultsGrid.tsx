@@ -79,8 +79,11 @@ export function ResultsGrid({ results, isLoading }: ResultsGridProps) {
 
   return (
     <div className="space-y-4">
-      {sorted.length > 0 && (
-        <SortFilterBar resultCount={completedResults.length} />
+      {results.length > 0 && (
+        <SortFilterBar
+          resultCount={filtered.reduce((n, r) => n + r.offers.length, 0)}
+          nonstopCount={filtered.reduce((n, r) => n + r.offers.filter((o) => o.outbound.stops === 0 && o.inbound.stops === 0).length, 0)}
+        />
       )}
 
       <motion.div
